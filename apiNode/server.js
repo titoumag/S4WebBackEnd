@@ -5,6 +5,8 @@ const app = express();
 dotenv.config();
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import session from "express-session";
+import passport from "passport";
 
 const port = process.env.PORT;
 import users from './routes/user.router.js';
@@ -53,8 +55,15 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/gestionTournoi",gestionTournoiRouter);
 app.use("/gestionParticipant",gestionParticipantRouter);
 
+
+app.use(session({
+    secret: "tHiSiSasEcRetStr",
+    resave: true,
+    saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
 app.get("/",(req, res)=>{
-    res.status(200).send("salut");
+    res.status(200).send("salutHome");
 })
 
 app.get("/*", (req, res) => {
