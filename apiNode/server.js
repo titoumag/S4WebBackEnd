@@ -5,6 +5,7 @@ const app = express();
 dotenv.config();
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+
 import session from "express-session";
 import passport from "passport";
 
@@ -43,6 +44,13 @@ app.use(cors())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false })); //?
 
+app.use(session({
+    secret: "tHiSiSasEcRetStr",
+    resave: true,
+    saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use("/users",users);
 app.use("/evenements",evenements);
 app.use("/stands",stands);
@@ -55,13 +63,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/gestionTournoi",gestionTournoiRouter);
 app.use("/gestionParticipant",gestionParticipantRouter);
 
-
-app.use(session({
-    secret: "tHiSiSasEcRetStr",
-    resave: true,
-    saveUninitialized: true }));
-app.use(passport.initialize());
-app.use(passport.session());
 app.get("/",(req, res)=>{
     res.status(200).send("salutHome");
 })
@@ -72,17 +73,4 @@ app.get("/*", (req, res) => {
 
 app.listen(port,()=>{
     console.log("Le serveur ecoute sur port " + port);
-    // userRepo.createTable()
-    //     .then(()=>{
-    //         return userRepo.count()
-    //     })
-    //     .then((numrows)=>{
-    //         console.log("num row nin employe "+numrows)
-    //         if (numrows==0){
-    //             return userRepo.initTable()
-    //         }
-    //     })
-    //     .catch((err)=>{
-    //         console.error(err)
-    //     })
 });

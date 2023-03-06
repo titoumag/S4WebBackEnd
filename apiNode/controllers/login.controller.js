@@ -7,16 +7,13 @@ import {Strategy as LocalStrategy} from "passport-local";
 
 
 const login = async (req, res) => {
-    // const pseudo = req.body.pseudo;
-    // const mdp = req.body.password;
-    // passport.authenticate('local', {
-    //     successRedirect: '/',
-    //     failureRedirect: '/login'
-    // })
-    res.send("salut")
+    res.status(200).send({success: 1, data: req.user, token: generateToken(req.user)})
 }
 
-passport.use(new LocalStrategy(function verify(pseudo, mdp, cb) {
+passport.use(new LocalStrategy({
+    usernameField: 'pseudo',
+    passwordField: 'mdp'
+},function verify(pseudo, mdp, cb) {
     db.user.findOne({where: {pseudo: pseudo}})
         .then(user => {
             if (!user) { return cb(null, false, { message: 'Incorrect username or password.' }); }
@@ -28,10 +25,35 @@ passport.use(new LocalStrategy(function verify(pseudo, mdp, cb) {
                     // return res.status(403).send({success: 0, data: "wrong password"})
                     return cb(null, false, { message: 'Incorrect username or password.' });
                 }
-            }).catch(err => cb(err));
+            });
         }).catch(err => cb(err));
 }))
 
+passport.serializeUser(function (user, cb) {
+    cb(null, user.idUser);
+})
+passport.deserializeUser(function (id, cb) {
+    db.user.findOne({where: {idUser: id}})
+        .then(user => {
+            cb(null, user);
+        }).catch(err => cb(err));
+})
+
+ const verificationDroit2 = (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) return next(err);
+
+        if (!user)
+            return res.status(400).send([user, "Cannot log in", info]);
+
+        req.logIn(user, function (err) {
+            if (err) return next(err);
+
+            next()
+        });
+            // return res.send("Logged in");
+    })(req,res,next)
+}
 
 const register = async (req, res) => {
     const nom = req.body.nom;
@@ -62,4 +84,4 @@ const register = async (req, res) => {
     });
 }
 
-export default {login, register}
+export default {login, register,verificationDroit2}

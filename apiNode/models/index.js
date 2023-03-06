@@ -111,7 +111,7 @@ db.tournoi.belongsToMany(db.user, {through: db.inscriptionTournoi, foreignKey: '
 
 
 let option = {}
-option.force = true
+// option.force = true
 // option.alter = true
 await sequelize.sync(option) //{force:true}
 

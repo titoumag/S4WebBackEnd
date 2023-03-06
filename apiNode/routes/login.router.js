@@ -4,7 +4,7 @@ import passport from "passport";
 const router = express.Router();
 
 router.post("/login",
-    passport.authenticate('local', { failureRedirect: '/' })
+    loginController.verificationDroit2
     ,loginController.login)
 
 router.post("/register", loginController.register)

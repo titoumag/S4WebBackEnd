@@ -1,0 +1,55 @@
+methode de connection/verif dans bdd:
+//parametre 1 = facultatif = si on veux un autre nom pour la stategie (par defaut=local)
+//parametre 1 dans new LocalStrategy facultatif = si on veut un autre nom pour les attribut de connection 
+						= data dans la requete (par defaut : username et password)
+passport.use('local',new LocalStrategy({
+    usernameField: 'pseudo',
+    passwordField: 'mdp'
+},function verify(pseudo, mdp, cb) {
+ 	cb(err) // si erreur
+	cb(null,false, ...) // pas erreur mais pas connecté non plus (ex:mauvais mdp)
+	cb(null,data) // connecte
+}))
+
+--------------------------------------
+
+middleware de validation (=a appeller dans router)
+passport.authenticate('local', { failureRedirect: '/' }) //version simple
+
+const verificationDroit2 = (req, res, next) => { //version compliqué
+    passport.authenticate('local', (err, user, info) => {
+           ... ...
+        });
+    })(req,res,next)
+}
+
+----------------------------------
+
+serialisation/deserialisation (si on veut stocker des infos en local) (pour fct suivante)
+passport.serializeUser(function (user, cb) {
+    cb(null, user.idUser);
+})
+passport.deserializeUser(function (id, cb) {
+    db.user.findOne({where: {idUser: id}})
+        .then(user => {
+            cb(null, user);
+        }).catch(err => cb(err));
+})
+
+-------------------------------------------
+utilisation des serial : 
+req.logIn(user, callback())
+req.logout(user,callback())
+req.isAuthenticated();
+req.user -> recuperation possible de l'user dans middleware suivant
+
+---------------------------------------------
+
+dans server.js:
+app.use(session({
+    secret: "tHiSiSasEcRetStr",
+    resave: true,
+    saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
