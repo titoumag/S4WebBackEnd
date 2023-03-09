@@ -7,12 +7,13 @@ import {Strategy as LocalStrategy} from "passport-local";
 
 
 const login = async (req, res) => {
+    console.log("ok")
     res.status(200).send({success: 1, data: req.user, token: generateToken(req.user)})
 }
 
 passport.use(new LocalStrategy({
     usernameField: 'pseudo',
-    passwordField: 'mdp'
+    passwordField: 'password'
 },function verify(pseudo, mdp, cb) {
     db.user.findOne({where: {pseudo: pseudo}})
         .then(user => {
