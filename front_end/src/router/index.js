@@ -18,6 +18,7 @@ import EvenementDetailView from "@/views/evenements/EvenementDetailView.vue";
 import ListBoutique from "@/views/ListBoutique";
 import ListPresta from "@/views/ListPresta";
 import NewEventView from "@/views/evenements/NewEventView.vue";
+import ChatView from "@/views/ChatView.vue";
 // import TestListDataView from "@/views/TestListDataView";
 
 Vue.use(VueRouter)
@@ -100,6 +101,11 @@ const routes = [
         name:'user',
         component: ProfilUserView,
         meta: { requiresAuth: true ,role:CLIENT}
+    },
+    {
+        path:'/chat',
+        name:'chat',
+        component: ChatView
     },
     {
         path: '/contact',
