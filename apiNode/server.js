@@ -6,9 +6,6 @@ dotenv.config();
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
-import session from "express-session";
-import passport from "passport";
-
 const port = process.env.PORT;
 import users from './routes/user.router.js';
 import evenements from './routes/evenement.router.js';
@@ -43,13 +40,6 @@ app.use(cors())
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false })); //?
-
-app.use(session({
-    secret: "tHiSiSasEcRetStr",
-    resave: true,
-    saveUninitialized: true }));
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.use("/users",users);
 app.use("/evenements",evenements);

@@ -4,20 +4,35 @@ import {Strategy as LocalStrategy} from "passport-local";
 import bcrypt from "bcrypt";
 import db from "./db.js";
 import jwt from 'jsonwebtoken'
+import session from "express-session";
 
 const router = express.Router();
 
 router.post("/login", (req,res)=>{
     passport.authenticate('local', (err, user, info) => {
-        console.log("ok")
-        console.log(err,user,info)
-        if (err) return res.status(401).send(["erreur interne",err]);
+        if (err) return res.status(500).send(["erreur interne",err]);
         if (!user) return res.status(401).send({err:"Cannot log in",info});
         req.logIn(user, function (err) {
-            if (err) return res.status(401).send(["erreur interne 2",err]);
+            console.log("bien enrregistré",err)
+            if (err) return res.status(500).send(["erreur interne 2",err]);
             return res.status(200).send({success: 1, data: user, token: generateToken(user)})
         });
     })(req,res)
+})
+
+router.post("/logout", (req,res)=>{
+    req.logout();
+    res.status(200).send({success:1,data:"logout"})
+})
+
+router.post("/isConnected", (req,res)=>{
+    console.log(req.body)
+    console.log(req.user)
+    if (req.isAuthenticated()) {
+        res.status(200).send({success:1,data:req.user})
+    } else {
+        res.status(401).send({success:0,data:"not connected"})
+    }
 })
 
 
@@ -42,17 +57,20 @@ passport.use(new LocalStrategy({
 }))
 
 passport.serializeUser(function (user, cb) {
+    console.log("serializeUser",user.idUser)
     cb(null, user.idUser);
 })
 passport.deserializeUser(function (id, cb) {
+    console.log("deserializeUser",id)
     db.user.findOne({where: {idUser: id}})
         .then(user => {
+            console.log("deserializeUser",user)
             cb(null, user);
         }).catch(err => cb(err));
 })
 
 const tokenSecret = 'mysecret'
-const generateToken = (user) => {
+const generateToken =  (user) => {
     return jwt.sign({data: user}, tokenSecret, {expiresIn: '1h'})
 }
 
