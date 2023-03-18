@@ -19,6 +19,7 @@ import ListBoutique from "@/views/ListBoutique";
 import ListPresta from "@/views/ListPresta";
 import NewEventView from "@/views/evenements/NewEventView.vue";
 import ChatView from "@/views/ChatView.vue";
+import ModifImage from "@/views/ModifImage.vue";
 // import TestListDataView from "@/views/TestListDataView";
 
 Vue.use(VueRouter)
@@ -28,6 +29,11 @@ const routes = [
         path: '/carte',
         name: 'carte',
         component: CarteView
+    },
+    {
+        path: '/image',
+        name: 'image',
+        component: ModifImage
     },
     {
         path: '/',
