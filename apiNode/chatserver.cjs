@@ -10,15 +10,19 @@ const io = require('socket.io')(http,{
 const cors = require('cors');
 app.use(cors());
 
-
+clients = {}
 chatMessages = []
 
 io.on("connection", (socket) => {
     console.log("New client connected");
+    console.log(socket.id);
+
+
+    clients[socket.id] = "rgb("+(Math.random()*255)+","+(Math.random()*255)+","+(Math.random()*255)+")";
     io.emit("allMessages", chatMessages);
     socket.on("message", (data) => {
         console.log(data);
-        chatMessages.push(data);
+        chatMessages.push([data[0],clients[data[1]]]);
         io.emit("allMessages", chatMessages);
     });
     socket.on("disconnect", () => {
