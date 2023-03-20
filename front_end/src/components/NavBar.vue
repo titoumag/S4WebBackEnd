@@ -65,6 +65,7 @@ export default {
                 , {text: 'Liste des prestataires', icon: 'mdi-account-tie', color: 'grey', route: '/prestataire'}
                 , {text: 'Timeline', icon: 'mdi-timeline-clock-outline', color: 'grey', route: '/timeline'}
                 , {text: 'Contact', icon: 'mdi-email', color: 'grey', route: '/contact'}
+                , {text: 'Chat With Nobody', icon: 'mdi-home', color: 'grey', route: '/chat'}
             ],
             ADMIN, PRESTA, CLIENT, roles,
             drawer: false

@@ -1,9 +1,10 @@
 <template>
     <div class="login-container my-5">
         <h1>Chat with nobody TM</h1>
-        <div>
-          <p v-for="message in data" :key="message">{{ message }}</p>
+        <div style="overflow-y:scroll; height:400px; width:300px; background:black; color:lime;">
+          <p v-for="message in data" :key="message">> {{message}}</p>
         </div>
+        <br>
        <form @submit.prevent="sendChat">
             <input type="text" v-model="texte" id="texte" name="texte">
             <input type="submit" value="Envoyer">
@@ -50,7 +51,7 @@ export default {
 <style scoped>
 
 .login-container {
-    width: 300px;
+    width: 350px;
     margin: 0 auto;
     border: 1px solid #ccc;
     padding: 20px;
