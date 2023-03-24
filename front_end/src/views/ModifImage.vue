@@ -1,36 +1,39 @@
 <template>
     <div>
-        <h1>ModifImage</h1>
-            <h3>Parametres : </h3>
-        <div style="display: flex">
+        <h1 style="text-align: center">ModifImage</h1>
+        <v-container style="display: flex">
            <div style="width: 50%; padding: 10px; border: black 1px solid">
-                <input type="file" id="file" ref="inputFile" @change="newFile">
+                <input type="file" id="file" ref="inputFile" @change="newFile" accept="image/*">
                 <br>
-                <img :src="image" alt="image" v-if="image!=null" style="width: 100%">
+                <img :src="image" alt="image" v-if="image!=null" style="max-width: 100%; max-height: 300px">
+               <br>
+               <v-btn color="primary" @click="onSubmit" v-if="image!=null">Changer</v-btn>
            </div>
             <div style="width: 50% ; padding: 10px; border: black 1px solid">
-                <label for="gris">En noir et blanc : </label>
-                <input type="checkbox" id="gris" name="gris" v-model="gris">
-                <br>
-                <label for="taille">Redimmensioner (en %) (100=rien) : </label>
-                <input type="number" id="taille" name="taille" v-model="taille" min="20" max="300" style="border: black 1px solid">
-                <br>
-                <label for="enAuto">Enregistrer automatiquement image resultat : </label>
-                <input type="checkbox" id="enAuto" name="enAuto" v-model="enAuto">
-                <br>
+                <div>
+                    <div v-for="(champ,index) in champs" :key="index">
+                        <label :for="champ.nom">{{champ.texte}} : </label>
+                        <input :type="champ.type" :id="champ.nom" :name="champ.nom" v-model="champ.valeur" :min="champ.min" :max="champ.max">
+                        <br>
+                    </div>
+                    <v-select label="Extraire couleur :" v-model="rgb" :items="['Pas de changement', 'Rouge', 'Vert', 'Bleu']" />
+                </div>
+                <hr>
+                    <h3>Information sur l'image :</h3>
+                    <p>{{textInfo}}</p>
+                <hr>
+                    <label for="enAuto">Enregistrement automatique des images : </label>
+                    <input type="checkbox" id="enAuto" name="enAuto" v-model="enAuto">
+                <p>Cliquer sur une image pour la télécharger</p>
+<!--                    <v-btn v-if="imageFin.length>0" color="primary" @click="enregistrer(derniereImage,derniereImageName)">Enregistrer dernière image</v-btn>-->
             </div>
-        </div>
-        <br>
-        <v-btn color="primary" @click="onSubmit">Changer</v-btn>
-        <v-btn v-if="derniereImage!=null" color="primary" @click="enregistrer(derniereImage,derniereImageName)">Enregistrer dernière image</v-btn>
-        <br>
-<!--        <img :src="`data:image/png;base64,${imageFin}`" alt="image" width="200" height="200" v-if="imageFin!=null">-->
-<!--        <img :src="'http://localhost:3000/tmp/'+imageFin.nomFichier" alt="image" width="200" height="200" v-if="imageFin!=null">-->
-        <div>
-            <h3>Sorties :</h3>
-            <img v-for="(img,index) in imageFin" :key="index"
-                :src="img" alt="image" style="margin: 10px; max-width: 500px">
-        </div>
+        </v-container>
+        <v-row>
+            <v-col v-for="(img,index) in imageFin" :key="index" cols="3">
+                <img :src="img.img" alt="image"
+                    @click="enregistrer(img.file,img.nom)" style="margin: 20px; width: 100%">
+            </v-col>
+        </v-row>
 
     </div>
 </template>
@@ -44,49 +47,61 @@ export default {
         return {
             image: null,
             imageFin: [],
-            derniereImage:null,
-            derniereImageName:"",
-            gris:false,
-            taille:100,
-            enAuto:true
+            enAuto:false,
+            textInfo:"",
+
+            champs:[
+                {nom:"gris",type:"checkbox",valeur:false,texte:"En ton de gris"},
+                {nom:"tailleP",type:"number",valeur:100, texte: "Redimmensioner (en %) (100=rien)",min:20,max:300},
+                {nom:"binaire",type:"checkbox",valeur:false, texte: "En noir et blanc (binaire)"},
+                {nom:"inversion",type:"checkbox",valeur:false, texte: "Inversion"},
+                {nom:"flou",type:"number",valeur:0, texte: "Flou",min:0,max:20},
+                {nom:"rotation",type:"number",valeur:0, texte: "Rotation (en °) (sens horaire) (0=rien)",min:-180,max:180},
+                {nom:"retourX",type:"checkbox",valeur:false, texte: "Retourner en X"},
+                {nom:"retourY",type:"checkbox",valeur:false, texte: "Retourner en Y"},
+                {nom:"modifLong", type: "number", valeur: 0, texte: "Changer la longueur"},
+                {nom:"modifLarg", type: "number", valeur: 0, texte: "Changer la hauteur"},
+            ],
+            rgb:""
         }
     },
     methods: {
         newFile() {
             let file = this.$refs.inputFile.files[0];
-            if (file!==undefined)
-                this.image=URL.createObjectURL(file);
-            // let reader = new FileReader();
-            // reader.readAsDataURL(file);
-            // reader.onload = () => {
-            //     this.image = reader.result;
-            // }
-        },
-        _arrayBufferToBase64( buffer ) {
-            var binary = '';
-            var bytes = new Uint32Array( buffer );
-            console.log(bytes)
-            var len = bytes.byteLength;
-            for (var i = 0; i < len; i++) {
-                binary += String.fromCharCode( bytes[ i ] );
-            }
-            return window.btoa( binary );
+            if (file!==undefined) {
+                this.image = URL.createObjectURL(file);
+                console.log(file)
+
+                let formData = new FormData();
+                formData.append('file', file);
+                myaxios.post('/upload?info', formData).then((response) => {
+                    response.data.taille = file.size/1000000 +"Mo"
+                    this.textInfo = response.data
+                    this.champs.find(champ=>champ.nom==="modifLong").valeur=response.data.width
+                    this.champs.find(champ=>champ.nom==="modifLarg").valeur=response.data.height
+                }).catch((error) => {
+                    console.log(error)
+                    alert("impossible d'envoyer les données au serveur")
+                })
+            }else
+                this.image=null
         },
         onSubmit() {
             let file = this.$refs.inputFile.files[0];
+            // console.log(file)
             let formData = new FormData();
             formData.append('file', file);
-            formData.append('p_gris',this.gris)
-            formData.append('p_taille', this.taille)
-            console.log(file)
+            formData.append('rgb', this.rgb)
+            console.log(formData)
+            for (let champ of this.champs){
+                formData.append(champ.nom,champ.valeur)
+            }
             myaxios.post('/upload', formData, {
                 responseType: 'blob'//tres tres important si on veut recevoir un blob en reponse
             }).then((response) => {
-                // this.imageFin.push("http://localhost:3000/tmp/"+response.data.nomFichier +`?v=${new Date().getTime()}`)
-                console.log(response)
                 this.downloadFiles(response, "imageModifiee.png", "png")
             }).catch((error) => {
-                console.log(error);
+                console.log(error)
                 alert("impossible d'envoyer les données au serveur")
             })
         },
@@ -108,7 +123,7 @@ export default {
         },
         downloadFiles(data, file_name) {
             var file = data.data
-            this.imageFin.push(URL.createObjectURL(file))
+            this.imageFin.push({img:URL.createObjectURL(file),file:file,nom:file_name})
             this.derniereImage=file
             this.derniereImageName=file_name
             if(this.enAuto) {
@@ -120,5 +135,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

@@ -4,39 +4,76 @@ import {Image} from "image-js";
 import fs from "fs";
 
 const router = express.Router();
-const __dirname = process.cwd()+"\\tmp\\"
+const __dirname = process.cwd() + "\\tmp\\"
 
 var number = 0;
 
-router.use(fileUpload({debug:true}))
+router.use(fileUpload())
 router.use(async (req, res) => {
-    // console.log(`${process.cwd()}\\tmp`)
-    //     console.log(req.files)
-        const param = req.body
-        console.log(param)
-        const file = req.files.file
-        const i = file.name.lastIndexOf(".")
-        const newNom = file.name.substring(0,i)+"_"+number+file.name.substring(i)
-        // console.log(file.data)
-        // console.log(typeof file.data)
-        await file.mv(__dirname+newNom)
-        console.log("fin")
+    const param = req.body
+    const file = req.files.file
+    if (file===undefined) res.status(400).send("no file")
+    const i = file.name.lastIndexOf(".")
+    const newNom = file.name.substring(0, i) + "_" + number + file.name.substring(i)
 
-        var image = await Image.load(__dirname+newNom);
-        if (param.p_gris==="true")
-            image = image.grey();
-        console.log(__dirname+newNom)
-        await image.save(__dirname + newNom);
-        number++;
-            // setTimeout(()=>{
-            //         fs.unlink(__dirname+newNom,(err)=>{if (err) console.log(err)})
-            // },1000*30)
+    await file.mv(__dirname + newNom)
+    var image = await Image.load(__dirname + newNom);
 
-        // res.status(200).send({message:"ok",nomFichier:newNom,size:file.size,width:image.width,height:image.height});
-        res.status(200).sendFile(__dirname+newNom,()=>{
-                fs.unlink(__dirname+newNom,(err)=>{if (err) console.log(err)})
+    Object.keys(param).forEach((key) => {
+        if (param[key] === "true") param[key] = true
+        else if (param[key] === "false") param[key] = false
+        else if (!isNaN(param[key])) param[key] = Number(param[key])
+    })
+
+    if(req.query.info===""){
+        res.status(200).send({
+            width: image.width,
+            height: image.height,
+            colorModel: image.colorModel,
+            components: image.components,
+            alpha: image.alpha,
+            channels: image.channels,
+            bitDepth: image.bitDepth
         })
-        // res.download(__dirname+newNom)
+        fs.unlink(__dirname + newNom, (err) => {
+            if (err) console.log(err)
+        })
+    }
+    else{
+        image = traitement(image, param)
+        await image.save(__dirname + newNom);
+
+        res.status(200).sendFile(__dirname + newNom, () => {
+            fs.unlink(__dirname + newNom, (err) => {
+                if (err) console.log(err)
+            })
+        })
+    }
+    number++;
+
 })
+
+function traitement(image, param) {
+    if (param.tailleP!==100) //en premier pour reduire calculs suivants
+        image = image.resize({factor: param.tailleP/100});
+    if ((param.modifLong!==image.width || param.modifLarg!==image.height) && param.tailleP===100)
+        image = image.resize({width: param.modifLong, height: param.modifLarg});
+    if (param.binaire) {
+        image = image.grey();
+        image = image.mask();
+    }
+    if (param.gris) image = image.grey();
+    if (param.inversion)  image = image.invert();
+    if (param.retourX)  image = image.flipX();
+    if (param.retourY)  image = image.flipY();
+    if (param.rotation!==0)  image = image.rotate(param.rotation);
+    if (param.flou!==0) {
+        image = image.gaussianFilter({radius:parseInt(param.flou/3+1),sigma:param.flou});
+    //     console.log("ghjkl")
+    }
+    if (["Rouge","Vert","Bleu"].includes(param.rgb))
+        image = image.split()[["Rouge","Vert","Bleu"].indexOf(param.rgb)]
+    return image;
+}
 
 export default router;
