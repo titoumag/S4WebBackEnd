@@ -1,9 +1,17 @@
 <template>
     <div class="login-container my-5">
+
+      <form @submit.prevent="changeHost">
+        <input type="text" v-model="currentHost" id="hostname" name="hostname">
+        <input type="submit" value="Changer Hostname">
+      </form>
+      <br><br>
+
         <h1>Chat with nobody TM</h1>
-        <div>
-          <p v-for="message in data" :key="message">{{ message }}</p>
+        <div style="overflow-y:scroll; height:400px; width:300px; background:black; color:lime;">
+          <p v-for="message in data" :key="message" :style="'color:'+message[1]">> {{message[0]}}</p>
         </div>
+        <br>
        <form @submit.prevent="sendChat">
             <input type="text" v-model="texte" id="texte" name="texte">
             <input type="submit" value="Envoyer">
@@ -21,7 +29,8 @@ export default {
         return {
             texte: '',
             data:[],
-            socket:null
+            socket:null,
+            currentHost:"localhost"
         }
     },
     methods: {
@@ -30,12 +39,20 @@ export default {
       sendChat() {
           if(this.texte === '') return
 
-          this.socket.emit('message', this.texte);
+          this.socket.emit('message', [this.texte,this.socket.id]);
           this.texte = '';
+        },
+
+        changeHost(){
+          this.socket.close();
+          this.socket = io("http://"+this.currentHost+":4242");
+          this.socket.on("allMessages", data => {
+            this.data = data;
+          });
         }
     },
     mounted() {
-      this.socket = io("http://localhost:4242");
+      this.socket = io("http://"+this.currentHost+":4242");
       this.socket.on("allMessages", data => {
         this.data = data;
       });
@@ -50,7 +67,7 @@ export default {
 <style scoped>
 
 .login-container {
-    width: 300px;
+    width: 350px;
     margin: 0 auto;
     border: 1px solid #ccc;
     padding: 20px;
