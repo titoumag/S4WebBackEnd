@@ -42,6 +42,8 @@ router.use(async (req, res) => {
     else{
         image = traitement(image, param)
         await image.save(__dirname + newNom);
+        // var stream = fs.createReadStream('TEST.txt')
+        // stream.pipe(response)
 
         res.status(200).sendFile(__dirname + newNom, () => {
             fs.unlink(__dirname + newNom, (err) => {
@@ -58,11 +60,6 @@ function traitement(image, param) {
         image = image.resize({factor: param.tailleP/100});
     if ((param.modifLong!==image.width || param.modifLarg!==image.height) && param.tailleP===100)
         image = image.resize({width: param.modifLong, height: param.modifLarg});
-    if (param.binaire) {
-        image = image.grey();
-        image = image.mask();
-    }
-    if (param.gris) image = image.grey();
     if (param.inversion)  image = image.invert();
     if (param.retourX)  image = image.flipX();
     if (param.retourY)  image = image.flipY();
@@ -71,6 +68,11 @@ function traitement(image, param) {
         image = image.gaussianFilter({radius:parseInt(param.flou/3+1),sigma:param.flou});
     //     console.log("ghjkl")
     }
+    if (param.binaire) {
+        image = image.grey();
+        image = image.mask();
+    }
+    if (param.gris) image = image.grey();
     if (["Rouge","Vert","Bleu"].includes(param.rgb))
         image = image.split()[["Rouge","Vert","Bleu"].indexOf(param.rgb)]
     return image;

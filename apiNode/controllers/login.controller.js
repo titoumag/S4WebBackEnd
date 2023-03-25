@@ -1,6 +1,8 @@
 import db from "../models/index.js"
 import bcrypt from "bcrypt"
 import axios from "axios";
+import passport from "passport";
+import {Strategy as JwtStrategy,ExtractJwt} from "passport-jwt";
 
 
 const login = async (req, res) => {
@@ -14,17 +16,35 @@ const login = async (req, res) => {
     })
 }
 
+const tokenSecret = 'mysecret'
+const opts={jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), secretOrKey:tokenSecret}
+passport.use('jwt',new JwtStrategy(opts, function(jwt_payload, done) {
+    const user = jwt_payload.data
+    //methode verif role
+    console.log("aaa",jwt_payload.data)
+    return done(null, user);
+}));
+
+
 const isConnected = async (req, res) => {
-    axios.post("http://localhost:3010/auth/isConnected", {
-        pseudo: req.body.pseudo,
-        password: req.body.password
-    }).then((response) => {
-        res.status(200).send(response.data)
-    }).catch((err) => {
-        res.status(401).send({success:0,data:"nom autorisé"})
-    })
+    // axios.post("http://localhost:3010/auth/isConnected", {},{headers:req.headers})
+    // .then((response) => {
+    //     console.log("hgeriu",response.data)
+    //     res.status(200).send(response.data)
+    // }).catch((err) => {
+    //     console.log("hgeriu------",err.response)
+    //     res.status(401).send({success:0,data:"nom autorisé"})
+    // })
+    passport.authenticate('jwt', {session: false}, (err, user, info) => {
+        console.log("user",err,user)
+        if (err) return res.status(500).send(["erreur interne",err]);
+        if (!user) return res.status(401).send({success:0,data:"not connected"});
+        return res.status(200).send({success: 1, data: user})
+    })(req,res)
 }
 
+
+// -----> il faudra deplacer la methode dans le serveur d'auth
 const register = async (req, res) => {
     const nom = req.body.nom;
     const prenom = req.body.prenom;
