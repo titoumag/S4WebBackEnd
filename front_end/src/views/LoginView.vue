@@ -11,6 +11,13 @@
             <br>
             <input type="submit" value="Se connecter">
         </form>
+
+        <div v-show="!profile" id="g-signin2"></div>
+        <div v-if="profile">
+            <pre>{{ profile }}</pre>
+            <button @click="signOut">Sign Out</button>
+        </div>
+
         pas de compte ?
         <router-link to="/register">S'inscrire !</router-link>
     </div>
@@ -20,7 +27,10 @@
 import myaxios from "@/services/axios";
 import {mapMutations} from "vuex";
 import {ADMIN, PRESTA, roles} from "@/services/roles";
+// import axios from "axios";
 // import {mapGetters, mapMutations, mapState} from "vuex";
+
+
 
 export default {
     name: "LoginView",
@@ -28,7 +38,10 @@ export default {
         return {
             pseudo: '',
             password: '',
-            fail: 0
+            fail: 0,
+            // isInit: false,
+            // isSignIn: false
+            profile:null
         }
     },
     methods: {
@@ -36,6 +49,34 @@ export default {
 
         failedEnoughTimes(){
           return this.fail >= 3;
+        },
+
+        onSignIn(user) {
+            const profile = user.getBasicProfile();
+            const fullName = profile.getName();
+            const email = profile.getEmail();
+            const imageUrl = profile.getImageUrl();
+            this.profile = { fullName, email, imageUrl };
+        },
+
+        signOut() {
+            var auth2 = window.gapi.auth2.getAuthInstance();
+            auth2.signOut().then(() => {
+                console.log("User signed out");
+                this.profile = null;
+            });
+        },
+
+        initGoogleAuth() {
+            window.gapi.load("auth2", function () {
+                window.gapi.auth2.init();
+            });
+        },
+
+        renderGoogleAuthButton() {
+            window.gapi.signin2.render("g-signin2", {
+                onsuccess: this.onSignIn
+            });
         },
 
         login() {
@@ -77,6 +118,17 @@ export default {
                 alert('Mauvais identifiants');
             });
         }
+    },
+    mounted(){
+        // let that = this
+        // let checkGauthLoad = setInterval(function(){
+        //     that.isInit = that.$gAuth.isInit
+        //     that.isSignIn = that.$gAuth.isAuthorized
+        //     if(that.isInit) clearInterval(checkGauthLoad)
+        // }, 1000);
+        this.initGoogleAuth();
+        this.renderGoogleAuthButton();
+
     }
 }
 

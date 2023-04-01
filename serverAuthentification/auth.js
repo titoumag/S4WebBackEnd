@@ -13,13 +13,6 @@ import session from "express-session";
 const router = express.Router();
 const tokenSecret = 'mysecret'
 
-router.post("/login/local", (req,res)=>{
-    passport.authenticate('local', (err, user, info) => {
-        if (err) return res.status(500).send(["erreur interne",err]);
-        if (!user) return res.status(401).send({err:"Cannot log in",info});
-        return res.status(200).send({success: 1, data: user, token: generateToken(user)})
-    })(req,res)
-})
 
 router.post("/logout", (req,res)=>{
     req.logout();
@@ -44,6 +37,14 @@ router.post("/isConnected", (req,res)=>{
 })
 
 //-----------------partie locale----------------
+
+router.post("/login/local", (req,res)=>{
+    passport.authenticate('local', (err, user, info) => {
+        if (err) return res.status(500).send(["erreur interne",err]);
+        if (!user) return res.status(401).send({err:"Cannot log in",info});
+        return res.status(200).send({success: 1, data: user, token: generateToken(user)})
+    })(req,res)
+})
 
 passport.use(new LocalStrategy({
     usernameField: 'pseudo',

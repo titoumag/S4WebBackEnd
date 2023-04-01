@@ -10,6 +10,8 @@ Vue.config.productionTip = false
 
 Vue.use(VueCookies)
 Vue.use(DatetimePicker)
+// import GAuth from 'vue-google-oauth2'
+// Vue.use(GAuth, {clientId: ""})
 new Vue({
     router,
     store,
