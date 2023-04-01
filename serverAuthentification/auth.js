@@ -1,8 +1,9 @@
 import express from "express";
 import passport from "passport";
 import {Strategy as LocalStrategy} from "passport-local";
-import GoogleStrategy from 'passport-google-oidc';
+// import GoogleStrategy from 'passport-google-oidc';
 // import {Strategy as GoogleStrategy} from 'passport-google';
+import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
 import {Strategy as JwtStrategy,ExtractJwt} from "passport-jwt";
 import bcrypt from "bcrypt";
 import db from "./db.js";
@@ -16,20 +17,8 @@ router.post("/login/local", (req,res)=>{
     passport.authenticate('local', (err, user, info) => {
         if (err) return res.status(500).send(["erreur interne",err]);
         if (!user) return res.status(401).send({err:"Cannot log in",info});
-        // req.logIn(user, function (err) {
-        //     console.log("bien enrregistré",err)
-        //     if (err) return res.status(500).send(["erreur interne 2",err]);
-        //     return res.status(200).send({success: 1, data: user, token: generateToken(user)})
-        // });
         return res.status(200).send({success: 1, data: user, token: generateToken(user)})
     })(req,res)
-})
-
-router.get("/login/google",passport.authenticate('google'))
-router.get("/redirect/google", (req,res)=>{
-        console.log(req.body)
-        console.log(req.query)
-        res.send("ok")
 })
 
 router.post("/logout", (req,res)=>{
@@ -54,9 +43,7 @@ router.post("/isConnected", (req,res)=>{
     })(req,res)
 })
 
-const generateToken =  (user) => {
-    return jwt.sign({data: user}, tokenSecret, {expiresIn: '1h'})
-}
+//-----------------partie locale----------------
 
 passport.use(new LocalStrategy({
     usernameField: 'pseudo',
@@ -75,18 +62,50 @@ passport.use(new LocalStrategy({
         }).catch(err => cb(err));
 }))
 
+//-----------------partie google----------------
+
+router.get("/google",passport.authenticate('google',{ scope: ['email'] }))
+router.get("/redirect/google", passport.authenticate('google'),
+    (req,res)=>{
+        // console.log(req.body)
+        // console.log(req.user)
+        // res.json(req.user)
+        if (req.isAuthenticated())
+            res.status(200).send({success:1,data:req.user})
+            // res.redirect("http://localhost:3000/")
+        else
+            res.status(401).send({err:"Cannot log in"});
+            // res.redirect("http://localhost:3000/login")
+    })
+
 // Utilisation Google :
 // <a href="/login/google" class="button">Sign in with Google</a>
 passport.use(new GoogleStrategy({
         clientID: "352336312565-2m85js8n5mm6u4oeq0idls53noks5h2b.apps.googleusercontent.com",
         clientSecret: "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",
         callbackURL: 'http://localhost:3010/auth/redirect/google'
-    }, function verify(issuer, profile, cb) {
-
-            console.log("profile", profile)
-            console.log("issuer", issuer)
-            return cb(null, profile);
+    }, function verify(accessToken, refreshToken, profile, cb) {
+            const email = profile._json.email
+            db.user.findOne({where: {email: email}})
+                .then(user => {
+                    if (!user) { return cb(null, false, { message: 'Incorrect username or password.' }); }
+                    else
+                        return cb(null, user);
+                }).catch(err => cb(err));
 }))
+passport.serializeUser(function (user, cb) {
+    cb(null, user);
+})
+passport.deserializeUser(function (id, cb) {
+    console.log("deserializeUser",id)
+    cb(null,id)
+})
+
+//---------------partie JWT------------------
+
+const generateToken =  (user) => {
+    return jwt.sign({data: user}, tokenSecret, {expiresIn: '1h'})
+}
 
 const opts={
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -101,20 +120,5 @@ passport.use('jwt',new JwtStrategy(opts, function(jwt_payload, done) {
     }else
         return done(null, false);
 }));
-
-
-/*
-passport.serializeUser(function (user, cb) {
-    console.log("serializeUser",user.idUser)
-    cb(null, user.idUser);
-})
-passport.deserializeUser(function (id, cb) {
-    console.log("deserializeUser",id)
-    db.user.findOne({where: {idUser: id}})
-        .then(user => {
-            console.log("deserializeUser",user)
-            cb(null, user);
-        }).catch(err => cb(err));
-})*/
 
 export default router;

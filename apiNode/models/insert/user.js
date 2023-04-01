@@ -56,5 +56,14 @@ export default async (db) => {
         isNotif: true,
         idRole: 2
     })
+        await db.user.create({
+            nom: 'moi',
+            prenom: 'moi',
+            pseudo: 'lecreateur',
+            password: '$2b$10$zR7F3b9SYSuEsg36mkoOjOkI2E5zs8fSMWkjXJ.V8NAeFghfXxnXm',/*error404*/
+            email: 'titouanmagnin2@gmail.com',
+            isNotif: true,
+            idRole: 1
+        })
 
 }
