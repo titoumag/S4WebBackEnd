@@ -12,11 +12,13 @@
             <input type="submit" value="Se connecter">
         </form>
 
-        <div v-show="!profile" id="g-signin2"></div>
-        <div v-if="profile">
-            <pre>{{ profile }}</pre>
-            <button @click="signOut">Sign Out</button>
-        </div>
+<!--        <div v-show="!profile" id="g-signin2"></div>-->
+<!--        <div v-if="profile">-->
+<!--            <pre>{{ profile }}</pre>-->
+<!--            <button @click="signOut">Sign Out</button>-->
+<!--        </div>-->
+
+        <a href="http://localhost:3010/auth/google">Se connecter avec Google</a>
 
         pas de compte ?
         <router-link to="/register">S'inscrire !</router-link>
@@ -41,7 +43,7 @@ export default {
             fail: 0,
             // isInit: false,
             // isSignIn: false
-            profile:null
+            // profile:null
         }
     },
     methods: {
@@ -51,6 +53,10 @@ export default {
           return this.fail >= 3;
         },
 
+        // connectionGoogle(){
+        //
+        // }
+/*
         onSignIn(user) {
             const profile = user.getBasicProfile();
             const fullName = profile.getName();
@@ -78,7 +84,7 @@ export default {
                 onsuccess: this.onSignIn
             });
         },
-
+*/
         login() {
             if (this.pseudo === "") {
                 this.fail++;
@@ -126,8 +132,8 @@ export default {
         //     that.isSignIn = that.$gAuth.isAuthorized
         //     if(that.isInit) clearInterval(checkGauthLoad)
         // }, 1000);
-        this.initGoogleAuth();
-        this.renderGoogleAuthButton();
+        // this.initGoogleAuth();
+        // this.renderGoogleAuthButton();
 
     }
 }

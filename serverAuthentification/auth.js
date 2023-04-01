@@ -72,7 +72,9 @@ router.get("/redirect/google", passport.authenticate('google'),
         // console.log(req.user)
         // res.json(req.user)
         if (req.isAuthenticated())
-            res.status(200).send({success:1,data:req.user})
+            // req.redirect("http://localhost:8080/login").send({success:1,data:req.user})
+            res.redirect("http://localhost:8080/login?token="+generateToken(req.user)+"&user="+JSON.stringify(req.user))
+            // res.status(200).send({success:1,data:req.user})
             // res.redirect("http://localhost:3000/")
         else
             res.status(401).send({err:"Cannot log in"});
