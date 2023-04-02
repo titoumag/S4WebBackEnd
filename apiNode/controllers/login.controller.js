@@ -1,8 +1,6 @@
 import db from "../models/index.js"
 import bcrypt from "bcrypt"
 import axios from "axios";
-import passport from "passport";
-import {Strategy as JwtStrategy,ExtractJwt} from "passport-jwt";
 
 
 const login = async (req, res) => {
@@ -15,25 +13,6 @@ const login = async (req, res) => {
         res.status(401).send({success:0,data:"nom autorisé"})
     })
 }
-
-const tokenSecret = 'mysecret'
-const opts={jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), secretOrKey:tokenSecret}
-passport.use('jwt',new JwtStrategy(opts, function(jwt_payload, done) {
-    const user = jwt_payload.data
-    //methode verif role
-    console.log("aaa",jwt_payload.data)
-    return done(null, user);
-}));
-
-const isConnected = async (req, res) => {
-    passport.authenticate('jwt', {session: false}, (err, user, info) => {
-        console.log("user",err,user)
-        if (err) return res.status(500).send(["erreur interne",err]);
-        if (!user) return res.status(401).send({success:0,data:"not connected"});
-        return res.status(200).send({success: 1, data: user})
-    })(req,res)
-}
-
 
 // -----> il faudra deplacer la methode dans le serveur d'auth
 const register = async (req, res) => {
@@ -65,4 +44,4 @@ const register = async (req, res) => {
     });
 }
 
-export default {login, register,isConnected}
+export default {login, register}

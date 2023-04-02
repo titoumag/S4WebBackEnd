@@ -1,5 +1,6 @@
 import express from "express";
 import standController from "../controllers/stand.controller.js";
+import {ADMIN, autorisation, PRESTA} from "../middleware/authentification.js";
 // import {droitAdmin, verificationDroit} from "../middleware/authentification.js";
 // import evenementController from "../controllers/evenement.controller.js";
 
@@ -99,7 +100,7 @@ router.get("/:id/commentaire", standController.getCommentaire)
 //la suite des routes necessite une authentification de role prestataire
 // router.use(verificationDroit,droitPresta)
 
-router.patch("/:id", standController.updateStand)
+router.patch("/:id",autorisation(PRESTA), standController.updateStand)
 /**
  * @swagger
  * /stands/:
@@ -130,7 +131,7 @@ router.patch("/:id", standController.updateStand)
 //la suite des routes necessite une authentification de role admin
 // router.use(verificationDroit,droitAdmin)
 
-router.post("/", standController.newStand)
+router.post("/", autorisation(ADMIN),standController.newStand)
 /**
  * @swagger
  * /stands/:
@@ -166,7 +167,7 @@ router.post("/", standController.newStand)
  *              description: Erreur lors de l'ajout du stand
  */
 
-router.delete("/:id", standController.deleteStand)
+router.delete("/:id",autorisation(ADMIN), standController.deleteStand)
 /**
  * @swagger
  * /stands/{id}:
@@ -186,7 +187,7 @@ router.delete("/:id", standController.deleteStand)
  *              description: Erreur lors de la suppression du stand
  */
 
-router.delete("/commentaire/:id", standController.deleteCommentaire)
+router.delete("/commentaire/:id",autorisation(PRESTA), standController.deleteCommentaire)
 /**
  * @swagger
  * /stands/{id}:

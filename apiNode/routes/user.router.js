@@ -3,6 +3,7 @@
 import express from "express";
 import usersC from "../controllers/user.controller.js";
 import standController from "../controllers/stand.controller.js";
+import {autorisation, CONNECTE, PRESTA,ADMIN} from "../middleware/authentification.js";
 
 var router = express.Router()
 router.get("/listRoles", usersC.listRole)
@@ -20,7 +21,7 @@ router.get("/listRoles", usersC.listRole)
  *              description: Erreur lors de l'envoi des rôles
  */
 
-router.get("/", usersC.list)
+router.get("/",usersC.list)
 /**
  * @swagger
  * /users/:
@@ -120,7 +121,7 @@ router.post("/", usersC.newUser)
  *              description: Erreur lors de l'ajout de l'utilisateur
  */
 
-router.patch("/:id", usersC.modifUser)
+router.patch("/:id",autorisation(CONNECTE), usersC.modifUser)
 /**
  * @swagger
  * /users/:
@@ -167,7 +168,7 @@ router.patch("/:id", usersC.modifUser)
  *              description: Erreur lors de la modification de l'utilisateur
  */
 
-router.delete("/:id", usersC.deleteUser)
+router.delete("/:id",autorisation(ADMIN), usersC.deleteUser)
 /**
  * @swagger
  * /users/{id}:

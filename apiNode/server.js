@@ -39,7 +39,7 @@ app.use(cors())
 app.use(passport.initialize());
 
 // app.use(express.static('public'));
-app.use('/tmp',express.static('tmp'));
+// app.use('/tmp',express.static('tmp'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false })); //?

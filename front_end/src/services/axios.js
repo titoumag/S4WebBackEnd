@@ -9,7 +9,7 @@ const myaxios = axios.create({
 myaxios.interceptors.request.use(
     config => {
         const token = store.state.currentUser ? store.state.currentUser.token : null;
-        return { ...config, headers: { token: token } }
+        return { ...config, headers: { authorization: token } }
     },
     error => { return Promise.reject(error) }
 )

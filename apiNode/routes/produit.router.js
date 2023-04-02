@@ -2,6 +2,7 @@
 // const usersC = require("../controllers/user.controller")
 import express from "express";
 import produitC from "../controllers/produit.controller.js";
+import {autorisation, PRESTA} from "../middleware/authentification.js";
 
 var router = express.Router()
 router.get("/listTypeProduit", produitC.listTypeProduit)
@@ -54,7 +55,7 @@ router.get("/:id", produitC.getProduitById)
  *              description: Erreur lors de l'envoi du produit
  */
 
-router.post("/", produitC.newProduit)
+router.post("/",autorisation(PRESTA), produitC.newProduit)
 /**
  * @swagger
  * /produits/:
@@ -86,7 +87,7 @@ router.post("/", produitC.newProduit)
  *              description: Erreur lors de l'ajout du produit
  */
 
-router.put("/", produitC.modifProduit)
+router.put("/",autorisation(PRESTA), produitC.modifProduit)
 /**
  * @swagger
  * /produits/:
@@ -122,7 +123,7 @@ router.put("/", produitC.modifProduit)
  *              description: Erreur lors de la modification du produit
  */
 
-router.delete("/:id", produitC.deleteProduit)
+router.delete("/:id",autorisation(PRESTA), produitC.deleteProduit)
 /**
  * @swagger
  * /produits/{id}:

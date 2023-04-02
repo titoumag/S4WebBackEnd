@@ -2,6 +2,7 @@
 // const usersC = require("../controllers/user.controller")
 import express from "express";
 import evenementController from "../controllers/evenement.controller.js";
+import {autorisation, CONNECTE, PRESTA} from "../middleware/authentification.js";
 
 var router = express.Router()
 router.get("/listTypeEvenement", evenementController.listTypeEvenement)
@@ -34,7 +35,7 @@ router.get("/", evenementController.list)
  *              description: Erreur lors de l'envoi des évenements
  */
 
-router.get("/reservation", evenementController.listReservation)
+router.get("/reservation",autorisation(PRESTA), evenementController.listReservation)
 
 router.get("/:id", evenementController.getEvenementById)
 /**
@@ -58,7 +59,7 @@ router.get("/:id", evenementController.getEvenementById)
 
 router.get("/:id/reservation/",evenementController.getReservationByEvenement)
 
-router.post("/", evenementController.newEvenement)
+router.post("/",autorisation(PRESTA), evenementController.newEvenement)
 /**
  * @swagger
  * /evenements/:
@@ -96,7 +97,7 @@ router.post("/", evenementController.newEvenement)
  *              description: Erreur lors de l'ajout de l'evenement
  */
 
-router.put("/", evenementController.modifEvenement)
+router.put("/",autorisation(PRESTA), evenementController.modifEvenement)
 /**
  * @swagger
  * /evenements/:
@@ -138,7 +139,7 @@ router.put("/", evenementController.modifEvenement)
  *              description: Erreur lors de la modification de l'evenement
  */
 
-router.delete("/:id", evenementController.deleteEvenement)
+router.delete("/:id",autorisation(PRESTA), evenementController.deleteEvenement)
 /**
  * @swagger
  * /evenements/{id}:
@@ -158,7 +159,7 @@ router.delete("/:id", evenementController.deleteEvenement)
  *              description: Erreur lors de la suppression de l'evenement
  */
 
-router.post("/reservation/:id", evenementController.addUserInEvent)
+router.post("/reservation/:id",autorisation(CONNECTE), evenementController.addUserInEvent)
 /**
  * @swagger
  * /reservation/{id}:
@@ -184,7 +185,7 @@ router.post("/reservation/:id", evenementController.addUserInEvent)
  *              description: Erreur lors de l'ajout de la reservation
  */
 
-router.delete("/reservation/:id", evenementController.removeUserInEvent)
+router.delete("/reservation/:id",autorisation(CONNECTE), evenementController.removeUserInEvent)
 /**
  * @swagger
  * /reservation/{id}:
@@ -210,7 +211,7 @@ router.delete("/reservation/:id", evenementController.removeUserInEvent)
  *              description: Erreur lors de la suppression de la reservation
  */
 
-router.delete("/reservation/:id/all", evenementController.removeAllUsersInEvent)
+router.delete("/reservation/:id/all",autorisation(PRESTA), evenementController.removeAllUsersInEvent)
 /**
  * @swagger
  * /reservation/{id}/all:

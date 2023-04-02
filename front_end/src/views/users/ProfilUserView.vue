@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import myaxios from 'axios';
+import myaxios from '@/services/axios';
 import {mapState} from "vuex";
 import ModifierUser from "@/components/ModifierUser.vue";
 

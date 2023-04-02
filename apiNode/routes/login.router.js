@@ -1,11 +1,13 @@
 import express from "express";
 import loginController from "../controllers/login.controller.js";
-import passport from "passport";
+import {autorisation, CONNECTE, PRESTA} from "../middleware/authentification.js";
 const router = express.Router();
 
-router.post("/login", loginController.login)
+//router.post("/login", loginController.login)
 
-router.post("/isConnected", loginController.isConnected)
+router.post("/isConnected",autorisation(CONNECTE), (req,res)=>{
+    return res.status(200).send({success: 1, data: req.user})
+})
 
 router.post("/register", loginController.register)
 
