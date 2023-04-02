@@ -16,6 +16,7 @@
         </form>
 
         <v-btn @click="connexionGoogle">Se connecter avec Google</v-btn>
+        <v-btn @click="connexionGithub">Se connecter avec Github</v-btn>
 
         pas de compte ?
         <router-link to="/register">S'inscrire !</router-link>
@@ -51,6 +52,11 @@ export default {
             this.redirect = true;
             window.location = "http://localhost:3010/auth/google";
         },
+
+      connexionGithub(){
+        this.redirect = true;
+        window.location = "http://localhost:3010/auth/github";
+      },
 
         login() {
             if (this.pseudo === "") {

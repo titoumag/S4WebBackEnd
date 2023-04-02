@@ -5,6 +5,7 @@ import {Strategy as LocalStrategy} from "passport-local";
 // import {Strategy as GoogleStrategy} from 'passport-google';
 import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
 import {Strategy as JwtStrategy,ExtractJwt} from "passport-jwt";
+import {Strategy as GitHubStrategy} from 'passport-github';
 import bcrypt from "bcrypt";
 import db from "./db.js";
 import jwt from 'jsonwebtoken'
@@ -63,6 +64,55 @@ passport.use(new LocalStrategy({
         }).catch(err => cb(err));
 }))
 
+
+// ---------------- partie github ----------------
+
+router.get('/github',
+    passport.authenticate('github'));
+
+router.get('/redirect/github',
+    passport.authenticate('github', { failureRedirect: '/login' }),
+    function(req, res) {
+        if (req.isAuthenticated())
+            res.redirect("http://localhost:8080/login/callback?token="+generateToken(req.user)+"&user="+JSON.stringify(req.user))
+        else
+            res.status(401).send({err:"Cannot log in"});
+    });
+
+passport.use(new GitHubStrategy({
+        clientID: "18145edf5cc6a049e21e",
+        clientSecret: "5acb60837cfb969559b71e8ca39770245f9f69bf",
+        callbackURL: "http://localhost:3010/auth/redirect/github"
+    },
+    function verify(accessToken, refreshToken, profile, cb) {
+        console.log("user",profile._json)
+        console.log("user",profile)
+        const email = profile._json.email
+        db.user.findOne({where: {email: email}})
+            .then(async user => {
+                console.log("user",profile._json)
+                if (!user) {
+                    const newUser = {
+                        email: email,
+                        pseudo: profile._json.name,
+                        nom: profile._json.name,
+                        prenom: profile._json.name,
+                        password: "github",
+                        idRole: 3,
+                        isNotif:false
+                    }
+                    console.log(newUser);
+                    await db.user.create(newUser)
+                    newUser.created = true;
+                    return cb(null, newUser);
+                } else {
+                    user.created = false;
+                    return cb(null, user);
+                }
+            }).catch(err => cb(err));
+    }
+));
+
 //-----------------partie google----------------
 
 router.get("/google",passport.authenticate('google',{ scope: ['email','profile'] }))
@@ -91,6 +141,7 @@ passport.use(new GoogleStrategy({
             const email = profile._json.email
             db.user.findOne({where: {email: email}})
                 .then(async user => {
+                    console.log("user",profile._json)
                     if (!user) {
                         const newUser = {
                             email: email,
@@ -101,6 +152,7 @@ passport.use(new GoogleStrategy({
                             idRole: 3,
                             isNotif:false
                         }
+                        console.log(newUser);
                         await db.user.create(newUser)
                         newUser.created = true;
                         return cb(null, newUser);

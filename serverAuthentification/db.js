@@ -24,6 +24,6 @@ try {
 import {User} from "./modelUsers.js"
 db.user = User(Sequelize, sequelize)
 
-await sequelize.sync() //{force:true}
+await sequelize.sync({force:true}) //{force:true}
 
 export default db;
