@@ -1,5 +1,8 @@
 <template>
     <div class="login-container my-5">
+        <div style="height: 50px; background-color: var(--primary-color); color:white; text-align: center" v-if="redirect">
+            Redirection en cours vers google
+        </div>
         <h1>Connexion</h1>
         <img v-if="failedEnoughTimes()" style="text-align:center; width:250px; height:250px;" src="https://en.meming.world/images/en/b/b8/You_Are_Not_a_Clown._You_Are_The_Entire_Circus.jpg" alt="You are not a clown, you are the entire circus">
         <form v-if="!failedEnoughTimes()" @submit.prevent="login">
@@ -12,13 +15,7 @@
             <input type="submit" value="Se connecter">
         </form>
 
-<!--        <div v-show="!profile" id="g-signin2"></div>-->
-<!--        <div v-if="profile">-->
-<!--            <pre>{{ profile }}</pre>-->
-<!--            <button @click="signOut">Sign Out</button>-->
-<!--        </div>-->
-
-        <a href="http://localhost:3010/auth/google">Se connecter avec Google</a>
+        <v-btn @click="connexionGoogle">Se connecter avec Google</v-btn>
 
         pas de compte ?
         <router-link to="/register">S'inscrire !</router-link>
@@ -26,13 +23,9 @@
 </template>
 
 <script>
-import myaxios from "@/services/axios";
+import axios from "axios";
 import {mapMutations} from "vuex";
 import {ADMIN, PRESTA, roles} from "@/services/roles";
-// import axios from "axios";
-// import {mapGetters, mapMutations, mapState} from "vuex";
-
-
 
 export default {
     name: "LoginView",
@@ -41,6 +34,7 @@ export default {
             pseudo: '',
             password: '',
             fail: 0,
+            redirect:false
             // isInit: false,
             // isSignIn: false
             // profile:null
@@ -53,38 +47,11 @@ export default {
           return this.fail >= 3;
         },
 
-        // connectionGoogle(){
-        //
-        // }
-/*
-        onSignIn(user) {
-            const profile = user.getBasicProfile();
-            const fullName = profile.getName();
-            const email = profile.getEmail();
-            const imageUrl = profile.getImageUrl();
-            this.profile = { fullName, email, imageUrl };
+        connexionGoogle(){
+            this.redirect = true;
+            window.location = "http://localhost:3010/auth/google";
         },
 
-        signOut() {
-            var auth2 = window.gapi.auth2.getAuthInstance();
-            auth2.signOut().then(() => {
-                console.log("User signed out");
-                this.profile = null;
-            });
-        },
-
-        initGoogleAuth() {
-            window.gapi.load("auth2", function () {
-                window.gapi.auth2.init();
-            });
-        },
-
-        renderGoogleAuthButton() {
-            window.gapi.signin2.render("g-signin2", {
-                onsuccess: this.onSignIn
-            });
-        },
-*/
         login() {
             if (this.pseudo === "") {
                 this.fail++;
@@ -96,12 +63,13 @@ export default {
                 alert("pas de password ecrit");
                 return
             }
-            myaxios.post('/connection/login', {
+            axios.post('http://localhost:3010/auth/local', {
                 pseudo: this.pseudo,
                 password: this.password
             }).then(response => {
                 if (response.data.success) {
                     let data = response.data.data;
+                    console.log("gggg",data.idRole)
                     data.role = roles[data.idRole];
                     data.token = response.data.token;
                     this.setCurrentUser(data);

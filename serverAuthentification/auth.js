@@ -38,7 +38,7 @@ router.post("/isConnected", (req,res)=>{
 
 //-----------------partie locale----------------
 
-router.post("/login/local", (req,res)=>{
+router.post("/local", (req,res)=>{
     passport.authenticate('local', (err, user, info) => {
         if (err) return res.status(500).send(["erreur interne",err]);
         if (!user) return res.status(401).send({err:"Cannot log in",info});
@@ -65,7 +65,7 @@ passport.use(new LocalStrategy({
 
 //-----------------partie google----------------
 
-router.get("/google",passport.authenticate('google',{ scope: ['email'] }))
+router.get("/google",passport.authenticate('google',{ scope: ['email','profile'] }))
 router.get("/redirect/google", passport.authenticate('google'),
     (req,res)=>{
         // console.log(req.body)
@@ -73,7 +73,7 @@ router.get("/redirect/google", passport.authenticate('google'),
         // res.json(req.user)
         if (req.isAuthenticated())
             // req.redirect("http://localhost:8080/login").send({success:1,data:req.user})
-            res.redirect("http://localhost:8080/login?token="+generateToken(req.user)+"&user="+JSON.stringify(req.user))
+            res.redirect("http://localhost:8080/login/callback?token="+generateToken(req.user)+"&user="+JSON.stringify(req.user))
             // res.status(200).send({success:1,data:req.user})
             // res.redirect("http://localhost:3000/")
         else
@@ -90,10 +90,24 @@ passport.use(new GoogleStrategy({
     }, function verify(accessToken, refreshToken, profile, cb) {
             const email = profile._json.email
             db.user.findOne({where: {email: email}})
-                .then(user => {
-                    if (!user) { return cb(null, false, { message: 'Incorrect username or password.' }); }
-                    else
+                .then(async user => {
+                    if (!user) {
+                        const newUser = {
+                            email: email,
+                            pseudo: profile._json.name,
+                            nom: profile._json.family_name,
+                            prenom: profile._json.given_name,
+                            password: "google",
+                            idRole: 3,
+                            isNotif:false
+                        }
+                        await db.user.create(newUser)
+                        newUser.created = true;
+                        return cb(null, newUser);
+                    } else {
+                        user.created = false;
                         return cb(null, user);
+                    }
                 }).catch(err => cb(err));
 }))
 passport.serializeUser(function (user, cb) {

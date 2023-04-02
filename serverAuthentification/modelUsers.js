@@ -29,6 +29,10 @@ export const User = (Sequelize, sequelize) => {
         isNotif: {
             type: Sequelize.BOOLEAN,
             allowNull: false
-        }//idRole rajouter automatiquement
+        },
+        idRole: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+        }
     })
 }

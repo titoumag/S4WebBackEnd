@@ -25,16 +25,7 @@ passport.use('jwt',new JwtStrategy(opts, function(jwt_payload, done) {
     return done(null, user);
 }));
 
-
 const isConnected = async (req, res) => {
-    // axios.post("http://localhost:3010/auth/isConnected", {},{headers:req.headers})
-    // .then((response) => {
-    //     console.log("hgeriu",response.data)
-    //     res.status(200).send(response.data)
-    // }).catch((err) => {
-    //     console.log("hgeriu------",err.response)
-    //     res.status(401).send({success:0,data:"nom autorisé"})
-    // })
     passport.authenticate('jwt', {session: false}, (err, user, info) => {
         console.log("user",err,user)
         if (err) return res.status(500).send(["erreur interne",err]);

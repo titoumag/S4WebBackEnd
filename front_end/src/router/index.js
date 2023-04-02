@@ -20,6 +20,7 @@ import ListPresta from "@/views/ListPresta";
 import NewEventView from "@/views/evenements/NewEventView.vue";
 import ChatView from "@/views/ChatView.vue";
 import ModifImage from "@/views/ModifImage.vue";
+import LoginCallback from "@/views/LoginCallback.vue";
 // import TestListDataView from "@/views/TestListDataView";
 
 Vue.use(VueRouter)
@@ -69,6 +70,11 @@ const routes = [
         path: '/login',
         name: 'login',
         component: LoginView
+    },
+    {
+        path: '/login/callback',
+        name: 'loginC',
+        component: LoginCallback
     },
     {
         path: '/register',

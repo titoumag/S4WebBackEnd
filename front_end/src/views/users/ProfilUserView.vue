@@ -44,6 +44,8 @@ export default {
                 this.produitsReserves = res.data.data;
                 console.log(this.produitsReserves);
             })
+        if (this.$route.query.new)
+            alert("Votre compte a bien été créé avec google");
     }
 }
 </script>
