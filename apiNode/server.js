@@ -5,6 +5,8 @@ dotenv.config();
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import cors from 'cors'
+
+
 const port = process.env.PORT;
 
 import modifImage from "./modifImage.js";
@@ -37,6 +39,20 @@ const swaggerDocs = swaggerJsdoc(swaggerOption);
 
 app.use(cors())
 app.use(passport.initialize());
+
+const RateLimit = require("express-rate-limit");
+app.enable('trust proxy');
+
+const apilimiter = new RateLimit({
+    windowMs: 30 * 60 * 1000, // 30 par minutes
+    max: 100,
+});
+
+app.use(apilimiter);
+
+const helmet = require("helmet");
+
+app.use(helmet());
 
 // app.use(express.static('public'));
 // app.use('/tmp',express.static('tmp'));
