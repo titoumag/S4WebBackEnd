@@ -9,5 +9,5 @@ et utiliser la commande npm install.
 - Partie commune : Authentification (local, google, github), Autorisation
 - Activité 2 (Julien OUDOT): Sockets et evenements (Chat)
 - Activité 3 (Titouan NICOT): Mesures de protection
-- Activité 4 (Samuel TOILLON): ~~                              ~~
+- Activité 4 (Samuel TOILLON): ---------------------------------------
 - Activité 5 (Titouan MAGNIN): Traitement d'une grande quantité de données avec NodeJS (service de traitement d'image)
